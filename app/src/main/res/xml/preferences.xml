@@ -22,11 +22,11 @@
 
   <PreferenceCategory android:title="Locator settings">
     <EditTextPreference 
-	android:title="Update interval"
-	android:summary="How often (in minutes) to update the location"
+	android:title="Send interval"
+	android:summary="How often (in minutes) to send the location"
 	android:numeric="decimal"
 	android:defaultValue="15"
-	android:key="update_interval" />
+	android:key="send_interval" />
     <ListPreference
     android:title="Accuracy"
     android:summary="Select location accuracy or power"
@@ -45,6 +45,12 @@
     android:numeric="decimal"
     android:defaultValue="10"
     android:key="displacement" />
+    <EditTextPreference
+    android:title="Request interval"
+    android:summary="How often (in sec) to request update location"
+    android:numeric="decimal"
+    android:defaultValue="10"
+    android:key="request_interval" />
   </PreferenceCategory>
 
   <PreferenceCategory android:title="Callback settings">

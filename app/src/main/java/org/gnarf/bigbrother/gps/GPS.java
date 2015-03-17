@@ -153,7 +153,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(this.prefs.update_interval*60*1000);
+        mLocationRequest.setInterval(this.prefs.request_interval*60*1000);
         mLocationRequest.setFastestInterval(FATEST_INTERVAL);
         mLocationRequest.setPriority(this.prefs.accuracy);
         mLocationRequest.setSmallestDisplacement(this.prefs.displacement);
@@ -188,7 +188,6 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         else {
             /* Polling mode */
             try {
-                stopLocationUpdates();
                 startLocationUpdates();
             }
             catch (IllegalArgumentException e) {
@@ -269,7 +268,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         /* Reset update alarms */
         this.am.setRepeating(this.am.RTC_WAKEUP,
                      System.currentTimeMillis() + 1000,
-                     this.prefs.update_interval, this.amintent);
+                     this.prefs.send_interval, this.amintent);
 
         /* Fix notifs */
         setupNotif();
@@ -486,11 +485,10 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
     public void onLocationChanged(Location loc) {
         System.out.println("BigBrotherGPS got loc from " +loc.getProvider());
         GPS.this.location = loc;
-
+        GPS.this.locationUpdate();
         if (!GPS.this.prefs.continous_mode) {
-		/* Stop waiting for locations. Will be restarted by alarm */
-            stopLocationUpdates();
-            GPS.this.locationUpdate();
+        /* Stop waiting for locations. Will be restarted by alarm */
+        stopLocationUpdates();
         }
     }
 

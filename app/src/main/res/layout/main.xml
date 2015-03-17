@@ -95,7 +95,32 @@
         android:layout_height="wrap_content" 
         android:text="m" />
     </LinearLayout>
-    <LinearLayout
+
+      <LinearLayout
+          android:orientation="horizontal"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal">
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:paddingRight="10dip"
+              android:text="Age:" />
+
+          <TextView
+              android:id="@+id/main_age"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="wait..." />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="ms" />
+      </LinearLayout>
+
+      <LinearLayout
       android:orientation="horizontal"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content" 

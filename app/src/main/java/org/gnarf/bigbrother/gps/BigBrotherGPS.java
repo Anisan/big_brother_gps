@@ -39,7 +39,7 @@ public class BigBrotherGPS extends Activity
 
     /* Our UI components */
     private TextView time;
-    private TextView prov, lat, lon, alt, acc;
+    private TextView prov, lat, lon, alt, acc, age;
     private TextView brg, spd;
     private TextView batlev, chrgr;
     private TextView log;
@@ -143,6 +143,7 @@ public class BigBrotherGPS extends Activity
 	this.lon = (TextView)findViewById(R.id.main_longitude);
 	this.alt = (TextView)findViewById(R.id.main_altitude);
 	this.acc = (TextView)findViewById(R.id.main_accuracy);
+    this.age = (TextView)findViewById(R.id.main_age);
 
 	this.brg = (TextView)findViewById(R.id.main_bearing);
 	this.spd = (TextView)findViewById(R.id.main_speed);
@@ -244,6 +245,7 @@ public class BigBrotherGPS extends Activity
 	    Double altitude = new Double(loc.getAltitude());
 	    Double bearing = new Double(loc.getBearing());
 	    Double speed = new Double(loc.getSpeed());
+        Long age = System.currentTimeMillis() - loc.getTime();
 
 	    Date date = new Date(loc.getTime());
 	    String df = BigBrotherGPS.this.dateformatter.format(date);
@@ -271,6 +273,7 @@ public class BigBrotherGPS extends Activity
 	    BigBrotherGPS.this.brg.setText(bearing.toString());
 	    BigBrotherGPS.this.spd.setText(speed.toString());
 	    BigBrotherGPS.this.batlev.setText((new Integer(bat_level)).toString());
+        BigBrotherGPS.this.age.setText(age.toString());
 	    if (charger)
 		BigBrotherGPS.this.chrgr.setText("(charging)");
 	    else

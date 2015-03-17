@@ -11,12 +11,13 @@ public class Preferences
     /* The preference values */
     public String target_url;
     public String secret;
-    public int update_interval;
+    public int send_interval;
     public int accuracy;
     public int displacement;
+    public boolean continous_mode;
+    public int request_interval;
     public int coordinate_format;
     public boolean start_on_boot;
-    public boolean continous_mode;
     public boolean show_in_notif_bar;
     public boolean http_resp_in_notif_bar;
     public boolean send_provider;
@@ -43,10 +44,15 @@ public class Preferences
 	this.target_url = prefs.getString("target_url", null);
 
 	float tmpf;
-	tmp = prefs.getString("update_interval","15");
+	tmp = prefs.getString("send_interval","15");
 	tmpf = (new Float(tmp)).floatValue();
 	tmpf *= 60 * 1000;
-	this.update_interval = (int)tmpf;
+	this.send_interval = (int)tmpf;
+
+    tmp = prefs.getString("request_interval","10");
+    tmpf = (new Float(tmp)).floatValue();
+    tmpf *= 1000;
+    this.request_interval = (int)tmpf;
 
     tmp = prefs.getString("displacement","10");
     this.displacement = (new Integer(tmp)).intValue();;
