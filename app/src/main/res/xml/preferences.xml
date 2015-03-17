@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="Program settings">
+    <CheckBoxPreference
+        android:title="Start service on boot"
+	android:defaultValue="0"
+	android:key="start_on_boot" />
+    <CheckBoxPreference
+        android:title="Show in notification bar"
+	android:defaultValue="1"
+	android:key="show_in_notif_bar" />
+    <ListPreference 
+        android:title="Coordinate format"
+	android:summary="The format of the coordinates shown on screen"
+        android:key="coordinate_format"
+        android:entries="@array/coordinate_format_names"
+        android:entryValues="@array/coordinate_format"
+        android:defaultValue="1"
+    />
+
+  </PreferenceCategory>
+
+  <PreferenceCategory android:title="Locator settings">
+    <EditTextPreference 
+	android:title="Update interval"
+	android:summary="How often (in minutes) to update the location"
+	android:numeric="decimal"
+	android:defaultValue="15"
+	android:key="update_interval" />
+    <ListPreference
+    android:title="Accuracy"
+    android:summary="Select location accuracy or power"
+    android:key="listAccuracy"
+    android:defaultValue="100"
+    android:entries="@array/accuracy_array"
+    android:entryValues="@array/accuracy_values" />
+    <CheckBoxPreference
+	android:title="Continous Operation"
+	android:summary="Keep the locator running. Better accuracy, but bad for battery"
+	android:defaultValue="0"
+	android:key="continous_mode" />
+    <EditTextPreference
+    android:title="Displacement"
+    android:summary="Minimum displacement between location updates in meters"
+    android:numeric="decimal"
+    android:defaultValue="10"
+    android:key="displacement" />
+  </PreferenceCategory>
+
+  <PreferenceCategory android:title="Callback settings">
+    <EditTextPreference 
+	android:title="URL"
+	android:summary="Enter the target URL"
+	android:defaultValue=""
+	android:inputType="textUri"
+	android:key="target_url" />
+    <EditTextPreference 
+	android:title="Secret"
+	android:summary="A shared secret used to authenticate the phone to the server"
+	android:defaultValue=""
+	android:key="secret" />
+    <CheckBoxPreference
+        android:title="Send provider"
+	android:summary="Select this if you wish to send information about the provider of the location data."
+	android:defaultValue="1"
+	android:key="send_provider" />
+    <CheckBoxPreference
+        android:title="Send altitude"
+	android:summary="Select this if you wish to send the altitude."
+	android:defaultValue="1"
+	android:key="send_altitude" />
+    <CheckBoxPreference
+        android:title="Send time"
+	android:summary="Select this if you wish to send the time of the fix to the server."
+	android:defaultValue="1"
+	android:key="send_time" />
+    <CheckBoxPreference
+        android:title="Send bearing"
+	android:summary="Select this if you wish to send the bearing."
+	android:defaultValue="1"
+	android:key="send_bearing" />
+    <CheckBoxPreference
+        android:title="Send speed"
+	android:summary="Select this if you wish to send the speed."
+	android:defaultValue="1"
+	android:key="send_speed" />
+    <CheckBoxPreference
+        android:title="Send battery status"
+	android:summary="Select this if you want the battery status to be sent in the POST request."
+	android:defaultValue="0"
+	android:key="send_batt_status" />
+    <CheckBoxPreference
+        android:title="Send device id"
+	android:summary="Sends device id (IMEI / MEID) in POST request."
+	android:defaultValue="0"
+	android:key="send_devid" />
+    <CheckBoxPreference
+        android:title="Send subscriber id"
+	android:summary="Sends subscriber id (IMSI) in POST request."
+	android:defaultValue="0"
+	android:key="send_subscrid" />
+    <CheckBoxPreference
+        android:title="Use HTTP response for notif. bar."
+	android:summary="Select this if you want the HTTP response to be displayed in the notification bar instead of the current location."
+	android:defaultValue="0"
+	android:key="http_resp_in_notif_bar" />
+  </PreferenceCategory>
+</PreferenceScreen>

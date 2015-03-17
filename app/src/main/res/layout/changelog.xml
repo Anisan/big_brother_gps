@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" >
+
+    <!-- Ver 2.6 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="2.6" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Added permission RECEIVE_BOOT_COMPLETED so newer (4.x?) androids can start BBG on boot" />
+
+    <!-- Ver 2.5 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="2.5" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Set correct content-type header on post. This only seems to appear on 3.0 or newer. Older android versions were unaffected" />
+
+    <!-- Ver 2.4 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="2.4" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Fixed issue where sending data to web server failed with newer android (2.3+)." />
+
+
+    <!-- Ver 2.3 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="2.3" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Quicker failover if GPS is disabled.\n* Connection errors are now logged on bottom of main screen instead of displaying a popup.\n* Main screen has been made scrollable so as to be usable with low-res devices." />
+
+    <!-- Ver 2.2 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="2.2" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Adapted for different screen sizes. Tested on Galaxy Tab." />
+
+    <!-- Ver 2.1 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="2.1" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Updated app so it can be moved to SD-card on android 2.2 devices\n* Sending of device id (IMEI/MEID) as 'deviceid=' POST parameter.\n* Sending of subscriber id (IMSI) as 'subscriberid=' POST parameter." />
+
+    <!-- Ver 2.0 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="2.0" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Fixed time zone on position date so it really is UTC.\n* Added options for sending/excluding most parameters from the HTTP request.\n* Added time of last fix to display.\n* Setting for coordinate format on display.\n* Added setting for continous locator operation. This would give better accuracy and better response if you set update time to less than a few minutes, but will drain your battery faster. " />
+
+    <!-- Ver 1.9 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="1.9" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Fixed date format" />
+
+    <!-- Ver 1.8 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="1.8" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Added 'provider' HTTP parameter to inform server of which location provider provided the position\n* Added altitude (Parameter-name: altitude).\n* Added speed and bearing (parameter-names: speed, bearing).\n* Added time(parameter-name: time).\n* Option to allow HTTP response to be displayed in the notification bar instead of current position.\n* Renamed end program button.\n* Added button to trigger location update." />
+
+    <!-- Ver 1.7 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="1.7" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Doesn't neuter sheep anymore.\n* Added this changelog that you are reading right now." />
+
+    <!-- Ver 1.6 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="1.6" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Added battery state notification.\n* Added preferences setting to hide app from notification bar\n* Changed update interval to allow decimal numbers for those that wish to update more often than once a minute." />
+
+    <!-- Ver 1.5 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="1.5" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Added a 'secret' parameter that (if set) will be sent to the server as part of the POST request. " />
+
+    <!-- Ver 1.4 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="1.4" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Fixes a forgotten call to unregisterReceiver() on app shutdown. App is now marked as singleInstance, since it can't really run more than one instance anyway." />
+
+    <!-- Ver 1.3 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="1.3" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:paddingBottom="20dip"
+      android:text="* Fixes a GPS timeout problem where the service sometimes didn't switch locator from GPS to network on timeout." />
+
+    <!-- Ver 1.0 -->
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:text="1.0" />
+    <TextView  
+      android:layout_width="wrap_content" 
+      android:layout_height="wrap_content" 
+      android:paddingLeft="20dip"
+      android:text="* First version" />
+
+  </LinearLayout>
+</ScrollView>

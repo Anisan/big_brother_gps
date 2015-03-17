@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string-array name="coordinate_format_names">
+    <item>[+-]Degrees</item>
+    <item>[+-]Degrees:minutes</item>
+    <item>[+-]Degrees:minutes:seconds</item>
+  </string-array>
+  <string-array name="coordinate_format">
+    <item>1</item>
+    <item>2</item>
+    <item>3</item>
+  </string-array>
+  <string-array name="accuracy_array">
+    <item>Balanced power accuracy</item>
+    <item>High accuracy</item>
+    <item>Low power</item>
+    <item>No power</item>
+  </string-array>
+  <string-array name="accuracy_values">
+    <item>102</item>
+    <item>100</item>
+    <item>104</item>
+    <item>105</item>
+  </string-array>
+</resources>
