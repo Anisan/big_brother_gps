@@ -153,7 +153,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(this.prefs.request_interval*60*1000);
+        mLocationRequest.setInterval(this.prefs.request_interval);
         mLocationRequest.setFastestInterval(FATEST_INTERVAL);
         mLocationRequest.setPriority(this.prefs.accuracy);
         mLocationRequest.setSmallestDisplacement(this.prefs.displacement);
