@@ -8,11 +8,17 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Notification;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.BatteryManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
@@ -69,10 +75,16 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
     /* Prefs */
     Preferences prefs;
 
+    /* DB history */
+    DBHelper dbHelper;
+
     @Override public void onCreate()
     {
 	    super.onCreate();
 	    System.out.println("GPS Service onCreate.");
+
+        // создаем объект для создания и управления версиями БД
+        dbHelper = new DBHelper(this);
 
         // First we need to check availability of play services
         if (checkPlayServices()) {
@@ -90,7 +102,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
 
         /* Create formatter */
         dateformatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
-        dateformatter.setTimeZone(new SimpleTimeZone(0, "UTC"));
+        dateformatter.setTimeZone(TimeZone.getDefault());
 
         /* Create binder */
         this.binder = new LocBinder(this);
@@ -297,14 +309,82 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         }
     }
 
-    /* Send a request to the URL and post some data */
-    protected void postLocation()
+    protected void addHistory(Location loc, int bat_level, boolean charger)
+    {
+        // подключаемся к БД
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        // создаем объект для данных
+        ContentValues cv = new ContentValues();
+        cv.put("latitude", loc.getLatitude());
+        cv.put("longitude", loc.getLongitude());
+        cv.put("accuracy", loc.getAccuracy());
+        cv.put("altitude", loc.getAltitude());
+        cv.put("provider", loc.getProvider());
+        cv.put("bearing", loc.getBearing());
+        cv.put("speed", loc.getSpeed());
+        cv.put("time", loc.getTime());
+        cv.put("battlevel", bat_level);
+        cv.put("charging", charger);
+
+        // вставляем запись и получаем ее ID
+        long rowID = db.insert("history", null, cv);
+        System.out.println("BigBrotherGPS: row inserted, ID = " + rowID);
+
+        final String DATABASE_COMPARE = "select count(*) from history";
+        int total = (int) DatabaseUtils.longForQuery(db, DATABASE_COMPARE, null);
+
+        // закрываем подключение к БД
+        dbHelper.close();
+
+        if (this.rpc_if != null)
+            this.rpc_if.onHistory(total);
+    }
+
+    protected void sendHistory()
+    {
+        // подключаемся к БД
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        // делаем запрос всех данных из таблицы history, получаем Cursor
+        Cursor c = db.query("history", null, null, null, null, null, null);
+        // ставим позицию курсора на первую строку выборки
+        // если в выборке нет строк, вернется false
+        if (c.moveToFirst()) {
+            do {
+                int id = c.getInt(c.getColumnIndex("id"));
+                Location loc = new Location(c.getString(c.getColumnIndex("provider")));
+                loc.setLatitude(c.getDouble(c.getColumnIndex("latitude")));
+                loc.setLongitude(c.getDouble(c.getColumnIndex("longitude")));
+                loc.setAccuracy(c.getFloat(c.getColumnIndex("accuracy")));
+                loc.setAltitude(c.getDouble(c.getColumnIndex("altitude")));
+                loc.setBearing(c.getFloat(c.getColumnIndex("bearing")));
+                loc.setSpeed(c.getFloat(c.getColumnIndex("speed")));
+                loc.setTime(c.getLong(c.getColumnIndex("time")));
+                int bat_level = c.getInt(c.getColumnIndex("battlevel"));
+                boolean charger = c.getInt(c.getColumnIndex("charging"))==1;
+
+                if (postLocation(loc, bat_level, charger))
+                    db.delete("history","id=?",new String[] {Integer.toString(id)});
+                else
+                    break;
+
+                // переход на следующую строку
+                // а если следующей нет (текущая - последняя), то false - выходим из цикла
+            } while (c.moveToNext());
+        } else
+            System.out.println("BigBrotherGPS: 0 rows");
+        c.close();
+
+        final String DATABASE_COMPARE = "select count(*) from history";
+        int total = (int) DatabaseUtils.longForQuery(db, DATABASE_COMPARE, null);
+        if (this.rpc_if != null)
+            this.rpc_if.onHistory(total);
+        // закрываем подключение к БД
+        dbHelper.close();
+    }
+
+    protected boolean postLocation(Location loc, int bat_level, boolean charger)
     {
         boolean do_notif = false;
-
-        /* No url, don't do anything */
-        if (this.target_url == null)
-            return;
 
         /* Prepare connection and request */
         HttpURLConnection con;
@@ -315,7 +395,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
             System.out.println("BigBrotherGPS: "+e.toString());
             if (this.rpc_if != null)
                 this.rpc_if.onError(e.toString());
-            return;
+            return false;
         }
 
         try {
@@ -324,8 +404,8 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         catch (ProtocolException e) {
             System.out.println("BigBrotherGPS: "+e.toString());
             if (this.rpc_if != null)
-            this.rpc_if.onError(e.toString());
-            return;
+                this.rpc_if.onError(e.toString());
+            return false;
         }
 
         con.setUseCaches(false);
@@ -334,7 +414,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
 
         /* If HTTP response is to be used in notif bar */
         if (this.prefs.show_in_notif_bar &&
-            this.prefs.http_resp_in_notif_bar) {
+                this.prefs.http_resp_in_notif_bar) {
             this.setupNotif();
             do_notif = true;
         }
@@ -342,36 +422,36 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         /* Build request data */
         StringBuffer req = new StringBuffer();
         req.append("latitude=");
-        req.append(this.location.getLatitude());
+        req.append(loc.getLatitude());
 
         req.append("&longitude=");
-        req.append(this.location.getLongitude());
+        req.append(loc.getLongitude());
 
         req.append("&accuracy=");
-        req.append(this.location.getAccuracy());
+        req.append(loc.getAccuracy());
 
         if (this.prefs.send_altitude) {
             req.append("&altitude=");
-            req.append(this.location.getAltitude());
+            req.append(loc.getAltitude());
         }
 
         if (this.prefs.send_provider) {
             req.append("&provider=");
-            req.append(this.location.getProvider());
+            req.append(loc.getProvider());
         }
 
         if (this.prefs.send_bearing) {
             req.append("&bearing=");
-            req.append(this.location.getBearing());
+            req.append(loc.getBearing());
         }
 
         if (this.prefs.send_speed) {
             req.append("&speed=");
-            req.append(this.location.getSpeed());
+            req.append(loc.getSpeed());
         }
 
         if (this.prefs.send_time) {
-            Date date = new Date(this.location.getTime());
+            Date date = new Date(loc.getTime());
             req.append("&time=");
             req.append(this.dateformatter.format(date));
         }
@@ -379,11 +459,11 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         /* Add battery status if configured */
         if (this.prefs.send_batt_status) {
             req.append("&battlevel=");
-            req.append(this.bat_level);
-            if (this.charger) {
-            req.append("&charging=1");
+            req.append(bat_level);
+            if (charger) {
+                req.append("&charging=1");
             } else {
-            req.append("&charging=0");
+                req.append("&charging=0");
             }
         }
 
@@ -407,46 +487,61 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
             req.append(tm.getSubscriberId());
         }
 
-            con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            con.setRequestProperty("Content-Length", ""+req.length());
+        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        con.setRequestProperty("Content-Length", ""+req.length());
 
         /* Connect and write */
-            StringBuffer response = new StringBuffer();
-            try {
-                con.connect();
+        StringBuffer response = new StringBuffer();
+        try {
+            con.connect();
 
-                DataOutputStream wr;
-                wr = new DataOutputStream(con.getOutputStream());
-                wr.writeBytes(req.toString());
-                wr.flush();
-                wr.close();
+            DataOutputStream wr;
+            wr = new DataOutputStream(con.getOutputStream());
+            wr.writeBytes(req.toString());
+            wr.flush();
+            wr.close();
 
-                DataInputStream rd;
-                rd = new DataInputStream(con.getInputStream());
-                if (do_notif) {
-                    response.append(rd.readLine());
-                }
-                rd.close();
+            DataInputStream rd;
+            rd = new DataInputStream(con.getInputStream());
+            if (do_notif) {
+                response.append(rd.readLine());
             }
-            catch (IOException e) {
-                System.out.println("BigBrotherGPS: "+e.toString());
-                if (this.rpc_if != null)
-                    this.rpc_if.onError(e.toString());
-                return;
-            }
-            con.disconnect();
+            rd.close();
+        }
+        catch (IOException e) {
+            System.out.println("BigBrotherGPS: "+e.toString());
+            if (this.rpc_if != null)
+                this.rpc_if.onError(e.toString());
+            return false;
+        }
+        con.disconnect();
 
-            System.out.println("BigBrotherGPS sent HTTP poke");
+        System.out.println("BigBrotherGPS sent HTTP poke");
 
         /* Set notification if we have it */
-            if (this.notif != null && do_notif) {
-                this.notif.when = System.currentTimeMillis();
-                this.notif.setLatestEventInfo(this,
-                        getString(R.string.app_name),
-                        response.toString(),
-                        this.notintent);
-                this.notman.notify(0, this.notif);
-            }
+        if (this.notif != null && do_notif) {
+            this.notif.when = System.currentTimeMillis();
+            this.notif.setLatestEventInfo(this,
+                    getString(R.string.app_name),
+                    response.toString(),
+                    this.notintent);
+            this.notman.notify(0, this.notif);
+        }
+
+        return true;
+    }
+
+    /* Send a request to the URL and post some data */
+    protected void postLocation()
+    {
+        /* No url, don't do anything */
+        if (this.target_url == null)
+            return;
+
+        if (postLocation(this.location,this.bat_level, this.charger))
+            sendHistory();
+        else
+            addHistory(this.location, this.bat_level, this.charger);
     }
 
     private void locationUpdate()
@@ -508,7 +603,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
     @Override
     public void onConnectionFailed(ConnectionResult result) {
         String error =  "Connection failed: ConnectionResult.getErrorCode() = " + result.getErrorCode();
-        System.out.println("BigBrotherGPS: "+ error);
+        System.out.println("BigBrotherGPS: " + error);
         if (this.rpc_if != null)
             this.rpc_if.onError(error);
     }
@@ -539,5 +634,37 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
 			      GPS.this.bat_level, GPS.this.charger);
 	}
     }
+
+    class DBHelper extends SQLiteOpenHelper {
+
+        public DBHelper(Context context) {
+            // конструктор суперкласса
+            super(context, "myDB", null, 1);
+        }
+
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            System.out.println("BigBrotherGPS: --- onCreate database ---");
+            // создаем таблицу с полями
+            db.execSQL("CREATE TABLE [history] ("
+                    + "[id] INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + "[latitude] DOUBLE,"
+                    + "[longitude] DOUBLE,"
+                    + "[accuracy] FLOAT,"
+                    + "[altitude] DOUBLE,"
+                    + "[provider] TEXT,"
+                    + "[bearing] FLOAT,"
+                    + "[speed] FLOAT,"
+                    + "[time] DATETIME,"
+                    + "[battlevel] INTEGER,"
+                    + "[charging] BOOLEAN);");
+        }
+
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+
+        }
+    }
+
 
 }

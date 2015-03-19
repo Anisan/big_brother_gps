@@ -180,7 +180,7 @@
     <LinearLayout
       android:orientation="horizontal"
       android:layout_width="fill_parent"
-      android:layout_height="wrap_content" 
+      android:layout_height="wrap_content"
       android:paddingBottom="30dip" >
       <TextView  
         android:layout_width="wrap_content" 
@@ -204,7 +204,39 @@
         android:text="" />
     </LinearLayout>
 
-    <Button
+      <LinearLayout
+          android:orientation="horizontal"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:paddingBottom="30dip" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:paddingRight="10dip"
+              android:text="History:" />
+
+          <TextView
+              android:id="@+id/main_history_record"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="wait..." />
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:paddingRight="10dip"
+              android:text=" record"
+              android:singleLine="false" />
+
+          <TextView
+              android:id="@+id/textView2"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="" />
+      </LinearLayout>
+
+      <Button
         android:id="@+id/main_triggerupdate"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

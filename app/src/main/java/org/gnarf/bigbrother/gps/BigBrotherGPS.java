@@ -42,6 +42,7 @@ public class BigBrotherGPS extends Activity
     private TextView prov, lat, lon, alt, acc, age;
     private TextView brg, spd;
     private TextView batlev, chrgr;
+    private TextView history_record;
     private TextView log;
 
     SimpleDateFormat dateformatter;
@@ -151,6 +152,8 @@ public class BigBrotherGPS extends Activity
 	this.batlev = (TextView)findViewById(R.id.main_bat_level);
 	this.chrgr = (TextView)findViewById(R.id.main_bat_charger);
 
+    this.history_record = (TextView)findViewById(R.id.main_history_record);
+
 	this.log = (TextView)findViewById(R.id.main_log);
 
 	/* Hook the button */
@@ -230,54 +233,59 @@ public class BigBrotherGPS extends Activity
 	{
 	    BigBrotherGPS.this.logError(err);
 	}
-	
-	@Override public void onStateChange(String prov, int state) {}
 
-	@Override public void onLocation(String prov, Location loc,
-					 int bat_level, boolean charger)
-	{
-	    if (loc == null)
-		return;
+        @Override
+        public void onHistory(int count) {
+            BigBrotherGPS.this.history_record.setText((new Integer(count)).toString());
+        }
 
-	    Double latitude = new Double(loc.getLatitude());
-	    Double longitude = new Double(loc.getLongitude());
-	    Integer accuracy = new Integer((int)loc.getAccuracy());
-	    Double altitude = new Double(loc.getAltitude());
-	    Double bearing = new Double(loc.getBearing());
-	    Double speed = new Double(loc.getSpeed());
-        Long age = System.currentTimeMillis() - loc.getTime();
+        @Override public void onStateChange(String prov, int state) {}
 
-	    Date date = new Date(loc.getTime());
-	    String df = BigBrotherGPS.this.dateformatter.format(date);
+        @Override public void onLocation(String prov, Location loc,
+                         int bat_level, boolean charger)
+        {
+            if (loc == null)
+            return;
 
-	    /* Set format */
-	    int cf;
-	    switch (BigBrotherGPS.this.prefs.coordinate_format) {
-	    case 2:
-		cf = loc.FORMAT_MINUTES;
-		break;
-	    case 3:
-		cf = loc.FORMAT_SECONDS;
-		break;
-	    default:
-		cf = loc.FORMAT_DEGREES;
-		break;
-	    }
+            Double latitude = new Double(loc.getLatitude());
+            Double longitude = new Double(loc.getLongitude());
+            Integer accuracy = new Integer((int)loc.getAccuracy());
+            Double altitude = new Double(loc.getAltitude());
+            Double bearing = new Double(loc.getBearing());
+            Double speed = new Double(loc.getSpeed());
+            Long age = System.currentTimeMillis() - loc.getTime();
 
-	    BigBrotherGPS.this.time.setText(df);
-	    BigBrotherGPS.this.prov.setText(loc.getProvider());	    
-	    BigBrotherGPS.this.lat.setText(loc.convert(latitude, cf));
-	    BigBrotherGPS.this.lon.setText(loc.convert(longitude, cf));
-	    BigBrotherGPS.this.alt.setText(altitude.toString());
-	    BigBrotherGPS.this.acc.setText(accuracy.toString());
-	    BigBrotherGPS.this.brg.setText(bearing.toString());
-	    BigBrotherGPS.this.spd.setText(speed.toString());
-	    BigBrotherGPS.this.batlev.setText((new Integer(bat_level)).toString());
-        BigBrotherGPS.this.age.setText(age.toString());
-	    if (charger)
-		BigBrotherGPS.this.chrgr.setText("(charging)");
-	    else
-		BigBrotherGPS.this.chrgr.setText("");
-	}
+            Date date = new Date(loc.getTime());
+            String df = BigBrotherGPS.this.dateformatter.format(date);
+
+            /* Set format */
+            int cf;
+            switch (BigBrotherGPS.this.prefs.coordinate_format) {
+            case 2:
+            cf = loc.FORMAT_MINUTES;
+            break;
+            case 3:
+            cf = loc.FORMAT_SECONDS;
+            break;
+            default:
+            cf = loc.FORMAT_DEGREES;
+            break;
+            }
+
+            BigBrotherGPS.this.time.setText(df);
+            BigBrotherGPS.this.prov.setText(loc.getProvider());
+            BigBrotherGPS.this.lat.setText(loc.convert(latitude, cf));
+            BigBrotherGPS.this.lon.setText(loc.convert(longitude, cf));
+            BigBrotherGPS.this.alt.setText(altitude.toString());
+            BigBrotherGPS.this.acc.setText(accuracy.toString());
+            BigBrotherGPS.this.brg.setText(bearing.toString());
+            BigBrotherGPS.this.spd.setText(speed.toString());
+            BigBrotherGPS.this.batlev.setText((new Integer(bat_level)).toString());
+            BigBrotherGPS.this.age.setText(age.toString());
+            if (charger)
+            BigBrotherGPS.this.chrgr.setText("(charging)");
+            else
+            BigBrotherGPS.this.chrgr.setText("");
+        }
     }
 }

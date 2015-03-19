@@ -8,4 +8,5 @@ public interface LocIF
     public void onLocation(String prov, Location loc,
 			   int bat_level, boolean charger);
     public void onError(String err);
+    public void onHistory(int count);
 }
