@@ -322,7 +322,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         cv.put("provider", loc.getProvider());
         cv.put("bearing", loc.getBearing());
         cv.put("speed", loc.getSpeed());
-        cv.put("time", loc.getTime());
+        cv.put("time", System.currentTimeMillis());
         cv.put("battlevel", bat_level);
         cv.put("charging", charger);
 
@@ -362,7 +362,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
                 int bat_level = c.getInt(c.getColumnIndex("battlevel"));
                 boolean charger = c.getInt(c.getColumnIndex("charging"))==1;
 
-                if (postLocation(loc, bat_level, charger))
+                if (postLocation(loc,c.getLong(c.getColumnIndex("time")), bat_level, charger))
                     db.delete("history","id=?",new String[] {Integer.toString(id)});
                 else
                     break;
@@ -382,7 +382,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         dbHelper.close();
     }
 
-    protected boolean postLocation(Location loc, int bat_level, boolean charger)
+    protected boolean postLocation(Location loc, long time, int bat_level, boolean charger)
     {
         boolean do_notif = false;
 
@@ -451,7 +451,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         }
 
         if (this.prefs.send_time) {
-            Date date = new Date(loc.getTime());
+            Date date = new Date(time);
             req.append("&time=");
             req.append(this.dateformatter.format(date));
         }
@@ -538,7 +538,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
         if (this.target_url == null)
             return;
 
-        if (postLocation(this.location,this.bat_level, this.charger))
+        if (postLocation(this.location, System.currentTimeMillis(),this.bat_level, this.charger))
             sendHistory();
         else
             addHistory(this.location, this.bat_level, this.charger);
