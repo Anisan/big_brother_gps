@@ -23,6 +23,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
 
+import android.location.Address;
+import android.location.Geocoder;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.AllClientPNames;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -37,6 +51,7 @@ import java.net.*;
 import java.text.SimpleDateFormat;
 
 import org.gnarf.bigbrother.gps.*;
+import org.json.JSONArray;
 
 public class GPS extends Service implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener
 {
@@ -544,12 +559,107 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
             addHistory(this.location, this.bat_level, this.charger);
     }
 
+    public static List<Address> getFromLocation(double lat, double lng, int maxResult) {
+
+        String address = String.format(Locale.ENGLISH, "http://maps.googleapis.com/maps/api/geocode/json?latlng=%1$f,%2$f&sensor=false&language=" + Locale.getDefault().getCountry(), lat, lng);
+        HttpGet httpGet = new HttpGet(address);
+        HttpClient client = new DefaultHttpClient();
+        client.getParams().setParameter(AllClientPNames.USER_AGENT, "Mozilla/5.0 (Java) Gecko/20081007 java-geocoder");
+        client.getParams().setIntParameter(AllClientPNames.CONNECTION_TIMEOUT, 5 * 1000);
+        client.getParams().setIntParameter(AllClientPNames.SO_TIMEOUT, 25 * 1000);
+        HttpResponse response;
+
+        List<Address> retList = null;
+
+        try {
+            response = client.execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            String json = EntityUtils.toString(entity, "UTF-8");
+
+            JSONObject jsonObject = new JSONObject(json);
+
+            retList = new ArrayList<Address>();
+
+            if ("OK".equalsIgnoreCase(jsonObject.getString("status"))) {
+                JSONArray results = jsonObject.getJSONArray("results");
+                if (results.length() > 0) {
+                    for (int i = 0; i < results.length() && i < maxResult; i++) {
+                        JSONObject result = results.getJSONObject(i);
+                        //System.out.println("BigBrotherGPS:"+ result.toString());
+                        Address addr = new Address(Locale.getDefault());
+
+                        JSONArray components = result.getJSONArray("address_components");
+                        String streetNumber = "";
+                        String route = "";
+                        for (int a = 0; a < components.length(); a++) {
+                            JSONObject component = components.getJSONObject(a);
+                            JSONArray types = component.getJSONArray("types");
+                            for (int j = 0; j < types.length(); j++) {
+                                String type = types.getString(j);
+                                if (type.equals("locality")) {
+                                    addr.setLocality(component.getString("long_name"));
+                                }else if (type.equals("country")) {
+                                    addr.setCountryName(component.getString("long_name"));
+                                    addr.setCountryCode(component.getString("short_name"));
+                                }else if (type.equals("postal_code")) {
+                                    addr.setPostalCode(component.getString("long_name"));
+                                }else if (type.equals("street_number")) {
+                                    streetNumber = component.getString("long_name");
+                                } else if (type.equals("route")) {
+                                    route = component.getString("long_name");
+                                }
+                            }
+                        }
+                        addr.setAddressLine(0, route + " " + streetNumber);
+                        addr.setAddressLine(1, result.getString("formatted_address"));
+                        addr.setLatitude(result.getJSONObject("geometry").getJSONObject("location").getDouble("lat"));
+                        addr.setLongitude(result.getJSONObject("geometry").getJSONObject("location").getDouble("lng"));
+                        retList.add(addr);
+                    }
+                }
+            }
+        } catch (ClientProtocolException e) {
+            System.out.println("BigBrotherGPS: Error calling Google geocode webservice."+ e.toString());
+        } catch (IOException e) {
+            System.out.println("BigBrotherGPS: Error calling Google geocode webservice."+ e.toString());
+        } catch (JSONException e) {
+            System.out.println("BigBrotherGPS: Error parsing Google geocode webservice response."+ e.toString());
+        }
+        return retList;
+    }
+
     private void locationUpdate()
     {
         /* Location update triggered */
         Location loc = this.location;
         if (loc == null)
             return;
+
+        double lat = loc.getLatitude();
+        double lon = loc.getLongitude();
+        Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+        List<Address> addressList = null;
+        try {
+            addressList = geocoder.getFromLocation(lat,lon, 1);
+        } catch (IOException e) {
+            //e.printStackTrace();
+            System.out.println("BigBrotherGPS: "+e.toString());
+            addressList = getFromLocation(lat,lon,1);
+        }
+        String result = "";
+        if (addressList != null && addressList.size() > 0) {
+                Address address = addressList.get(0);
+                StringBuilder sb = new StringBuilder();
+                //System.out.println("BigBrotherGPS: "+address.toString());
+                for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                    sb.append(address.getAddressLine(i)).append(",");
+                }
+                sb.append(address.getLocality());//.append(",");
+                //sb.append(address.getPostalCode()).append(",");
+                //sb.append(address.getCountryName());
+                result = sb.toString();
+            }
+        System.out.println("BigBrotherGPS: "+result);
 
         /* Change notification */
         if (this.prefs.show_in_notif_bar &&
@@ -567,7 +677,7 @@ public class GPS extends Service implements ConnectionCallbacks, OnConnectionFai
 
         /* Call to UI */
         if (this.rpc_if != null) {
-            this.rpc_if.onLocation(loc.getProvider(), loc,
+            this.rpc_if.onLocation(loc.getProvider(), loc,result,
                        this.bat_level,
                        this.charger);
         }

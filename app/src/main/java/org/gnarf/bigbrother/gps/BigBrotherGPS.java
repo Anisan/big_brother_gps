@@ -43,6 +43,7 @@ public class BigBrotherGPS extends Activity
     private TextView brg, spd;
     private TextView batlev, chrgr;
     private TextView history_record;
+    private TextView address;
     private TextView log;
 
     SimpleDateFormat dateformatter;
@@ -152,6 +153,8 @@ public class BigBrotherGPS extends Activity
 	this.batlev = (TextView)findViewById(R.id.main_bat_level);
 	this.chrgr = (TextView)findViewById(R.id.main_bat_charger);
 
+    this.address = (TextView)findViewById(R.id.main_address);
+
     this.history_record = (TextView)findViewById(R.id.main_history_record);
 
 	this.log = (TextView)findViewById(R.id.main_log);
@@ -212,7 +215,7 @@ public class BigBrotherGPS extends Activity
 	    CallBackIF cb = new CallBackIF();
 
 	    /* Read last position from locator */
-	    cb.onLocation("init", lb.getLocation(),
+	    cb.onLocation("init", lb.getLocation(),"init",
 			  lb.getBattery(), lb.getCharger());
 	    
 
@@ -241,7 +244,7 @@ public class BigBrotherGPS extends Activity
 
         @Override public void onStateChange(String prov, int state) {}
 
-        @Override public void onLocation(String prov, Location loc,
+        @Override public void onLocation(String prov, Location loc,String adress,
                          int bat_level, boolean charger)
         {
             if (loc == null)
@@ -272,6 +275,7 @@ public class BigBrotherGPS extends Activity
             break;
             }
 
+            BigBrotherGPS.this.address.setText(adress);
             BigBrotherGPS.this.time.setText(df);
             BigBrotherGPS.this.prov.setText(loc.getProvider());
             BigBrotherGPS.this.lat.setText(loc.convert(latitude, cf));

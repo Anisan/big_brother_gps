@@ -214,6 +214,31 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:paddingRight="10dip"
+              android:text="Address:" />
+
+          <TextView
+              android:id="@+id/main_address"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="wait..." />
+
+          <TextView
+              android:id="@+id/textView3"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="" />
+      </LinearLayout>
+
+      <LinearLayout
+          android:orientation="horizontal"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:paddingBottom="30dip" >
+
+          <TextView
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:paddingRight="10dip"
               android:text="History:" />
 
           <TextView
